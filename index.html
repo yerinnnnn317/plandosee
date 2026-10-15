@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan-Do-See Elite Workspace</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #FFEDF3 0%, #E0E7FF 40%, #D1FAE5 100%);
+      --card-glass: rgba(255, 255, 255, 0.88);
+      --card-border: rgba(255, 255, 255, 0.9);
+      --p-pink: #FF3366;
+      --p-purple: #7C3AED;
+      --p-blue: #2563EB;
+      --p-cyan: #06B6D4;
+      --p-green: #10B981;
+      --p-amber: #F59E0B;
+      --text-dark: #0F172A;
+      --text-sub: #475569;
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --glow-pink: 0 10px 25px rgba(255, 51, 102, 0.25);
+      --shadow-glass: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* 사이드바 */
+    .sidebar {
+      width: 260px;
+      background: var(--card-glass);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-glass);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--p-pink), var(--p-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+
+    .brand-badge {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--p-pink), var(--p-purple));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 900; font-size: 18px;
+      box-shadow: var(--glow-pink);
+    }
+
+    .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .nav-item {
+      padding: 12px 14px;
+      border-radius: var(--radius-lg);
+      color: var(--text-sub);
+      font-weight: 700; font-size: 13.5px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: #FFFFFF;
+      color: var(--p-purple);
+      box-shadow: 0 8px 18px rgba(124, 58, 237, 0.15);
+      border-color: var(--p-purple);
+    }
+
+    /* 사이드바 도구 */
+    .tool-box {
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid #FFF;
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* 메인 뷰포트 */
+    .main-content { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; scroll-behavior: smooth; }
+
+    /* T06-C82 필수 안내 배너 */
+    .notice-banner {
+      background: linear-gradient(90deg, #FEF3C7, #FDE68A);
+      border: 2px solid #F59E0B;
+      color: #78350F;
+      padding: 12px 20px;
+      border-radius: var(--radius-lg);
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+    }
+
+    /* 상단 집계 KPI 카운터 */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    .kpi-card {
+      background: #FFFFFF;
+      border: 2px solid #FFFFFF;
+      padding: 16px 20px;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-glass);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative; overflow: hidden;
+    }
+
+    .kpi-card:hover { transform: translateY(-3px); }
+    .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+    .kpi-card.c-purple::after { background: linear-gradient(90deg, var(--p-purple), var(--p-pink)); }
+    .kpi-card.c-green::after { background: linear-gradient(90deg, var(--p-green), var(--p-cyan)); }
+    .kpi-card.c-pink::after { background: linear-gradient(90deg, var(--p-pink), var(--p-amber)); }
+    .kpi-card.c-amber::after { background: linear-gradient(90deg, var(--p-amber), var(--p-pink)); }
+
+    .kpi-title { font-size: 12.5px; font-weight: 700; color: var(--text-sub); }
+    .kpi-val { font-size: 28px; font-weight: 900; margin-top: 2px; }
+
+    /* 3컬럼 가로 꽉 차는 레이아웃 */
+    .workspace-grid { display: grid; grid-template-columns: 1.05fr 1.15fr 0.80fr; gap: 16px; flex: 1; }
+
+    .section-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 22px;
+      box-shadow: var(--shadow-glass);
+      display: flex; flex-direction: column; gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .section-card.highlight {
+      border-color: var(--p-purple) !important;
+      box-shadow: 0 0 25px rgba(124, 58, 237, 0.3) !important;
+    }
+
+    .card-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 10px; border-bottom: 2px dashed rgba(15, 23, 42, 0.08);
+    }
+
+    .card-head h2 { font-size: 17px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+
+    /* 버튼 스타일 */
+    .btn-gradient {
+      background: linear-gradient(135deg, var(--p-pink), var(--p-purple));
+      color: #FFFFFF; border: none; border-radius: var(--radius-lg);
+      padding: 12px 16px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+      box-shadow: var(--glow-pink); transition: all 0.2s ease;
+    }
+
+    .btn-gradient:hover { transform: translateY(-2px); }
+    .btn-blue { background: linear-gradient(135deg, var(--p-blue), var(--p-cyan)); box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25); }
+
+    .form-group { display: flex; flex-direction: column; gap: 10px; }
+    label { font-size: 11.5px; font-weight: 800; color: var(--text-sub); }
+
+    input, select, textarea {
+      width: 100%; background: #FFFFFF;
+      border: 2px solid #E2E8F0; border-radius: var(--radius-lg);
+      padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--text-dark);
+      outline: none; transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: var(--p-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+    textarea { resize: none; height: 55px; }
+
+    /* 동적 리스트 디자인 */
+    .scroll-container { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
+
+    .item-card {
+      background: #FFFFFF; border: 2px solid #F1F5F9; border-radius: var(--radius-lg);
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+
+    .item-card.done { background: #F8FAFC; opacity: 0.8; }
+    .item-card.done .todo-title { text-decoration: line-through; color: var(--text-sub); }
+
+    .tag-badge {
+      font-size: 10.5px; background: #EEF2FF; color: var(--p-blue);
+      padding: 2px 8px; border-radius: 12px; font-weight: 700; display: inline-block;
+    }
+
+    .btn-sm {
+      padding: 5px 10px; font-size: 11px; font-weight: 800; border: none; border-radius: 6px; cursor: pointer;
+    }
+
+    .history-card {
+      background: rgba(255, 255, 255, 0.7); border: 1.5px solid #E2E8F0;
+      border-radius: 8px; padding: 8px 10px; font-size: 11.5px; margin-top: 4px;
+    }
+
+    .insight-box {
+      background: linear-gradient(135deg, #F3E8FF 0%, #E0E7FF 100%);
+      border: 2px solid #C084FC; border-radius: var(--radius-lg); padding: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 사이드바 -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <div class="brand-badge">P</div>
+        <span>PlanDoSee</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" onclick="focusSection('all', this)">📊 전체 대시보드</li>
+        <li class="nav-item" onclick="focusSection('plan', this)">🎯 대표 계획 (Plan)</li>
+        <li class="nav-item" onclick="focusSection('todo', this)">⚡ 세부 할 일 (Do)</li>
+        <li class="nav-item" onclick="focusSection('see', this)">📈 돌아보기 (See)</li>
+      </ul>
+
+      <!-- 검색 / 필터 도구 (T06-C18, C19) -->
+      <div class="tool-box">
+        <label>🔍 할 일 검색</label>
+        <input type="text" id="searchInput" placeholder="검색어 입력..." oninput="renderTodos()">
+        
+        <label style="margin-top:4px;">📂 상태 필터</label>
+        <select id="statusFilter" onchange="renderTodos()">
+          <option value="ALL">전체 보기</option>
+          <option value="IN_PROGRESS">진행 중</option>
+          <option value="DONE">완료됨</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- T06-C36 파일 내보내기 -->
+    <div>
+      <button class="btn-gradient" style="width: 100%; font-size: 12px; padding: 10px;" onclick="exportData()">
+        💾 자료 전체 내보내기 (.json)
+      </button>
+    </div>
+  </aside>
+
+  <!-- 2. 메인 화면 -->
+  <main class="main-content">
+
+    <!-- T06-C82 필수 안내 배너 -->
+    <div class="notice-banner">
+      <span>📢</span>
+      <span><strong>공개 안내:</strong> 지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.</span>
+    </div>
+
+    <!-- 상단 대시보드 KPI 숫자를 눌러 근거 이동 (T06-C28~C31, T06-C83) -->
+    <div class="kpi-grid">
+      <div class="kpi-card c-purple" onclick="filterAndScroll('ALL')">
+        <div class="kpi-title">계획 딸린 할 일 수</div>
+        <div class="kpi-val" style="color: var(--p-purple);" id="statPlanCount">0</div>
+      </div>
+      <div class="kpi-card c-green" onclick="filterAndScroll('DONE')">
+        <div class="kpi-title">완료 수</div>
+        <div class="kpi-val" style="color: var(--p-green);" id="statDoneCount">0</div>
+      </div>
+      <div class="kpi-card c-pink" onclick="filterAndScroll('DELAY')">
+        <div class="kpi-title">지연 수</div>
+        <div class="kpi-val" style="color: var(--p-pink);" id="statDelayCount">0</div>
+      </div>
+      <div class="kpi-card c-amber" onclick="filterAndScroll('BLOCK')">
+        <div class="kpi-title">막힘 수</div>
+        <div class="kpi-val" style="color: var(--p-amber);" id="statBlockCount">0</div>
+      </div>
+    </div>
+
+    <!-- 3컬럼 가로 가득 찬 워크스페이스 -->
+    <div class="workspace-grid">
+      
+      <!-- [카드 1] 대표 계획 세우기 (Plan) -->
+      <section class="section-card" id="colPlan">
+        <div class="card-head">
+          <h2 style="color: var(--p-purple);">🎯 1. 대표 계획 (Plan)</h2>
+        </div>
+        
+        <div class="form-group">
+          <div>
+            <label>계획 제목</label>
+            <input type="text" id="planTitle" placeholder="예: 플랜두씨 웹 앱 완성하기">
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div style="flex:1;">
+              <label>시작일 (T06-C04)</label>
+              <input type="date" id="planStartDate">
+            </div>
+            <div style="flex:1;">
+              <label>종료일 (T06-C04)</label>
+              <input type="date" id="planEndDate">
+            </div>
+          </div>
+
+          <div>
+            <label>우선순위 (T06-C05)</label>
+            <select id="planPriority">
+              <option value="HIGH">높음 (High)</option>
+              <option value="MEDIUM" selected>중간 (Mid)</option>
+              <option value="LOW">낮음 (Low)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>성공 기준 (T06-C06)</label>
+            <textarea id="planSuccess" placeholder="예: 과제 통과 기준 T06 만족"></textarea>
+          </div>
+
+          <div>
+            <label>예상 시간(시간) (T06-C07)</label>
+            <input type="number" id="planHours" placeholder="예: 8">
+          </div>
+
+          <button class="btn-gradient" id="btnSavePlan" onclick="savePlan()">✨ 계획 저장 / 고치기</button>
+
+          <!-- T06-C08 고치기 전 계획 이력 보존 박스 -->
+          <div style="margin-top: 6px;">
+            <label>📜 수정 전 보존된 이력 (T06-C08)</label>
+            <div class="scroll-container" id="planHistoryList" style="max-height: 100px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- [카드 2 & 카드 3] 세부 할 일 & 실행 기록 (Do) -->
+      <section class="section-card" id="colTodo">
+        <div class="card-head">
+          <h2 style="color: var(--p-blue);">⚡ 2. 세부 할 일 (Do)</h2>
+          <span style="font-size: 11px; font-weight: 700; color: var(--p-blue);">📌 정렬: 마감일 오름차순 (T06-C20)</span>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="todoContent" placeholder="할 일 내용 (T06-C09)">
+          
+          <div style="display: flex; gap: 6px;">
+            <div style="flex:1;">
+              <label>마감일시 (T06-C14)</label>
+              <input type="datetime-local" id="todoDue">
+            </div>
+            <div style="flex:1;">
+              <label>우선순위 (T06-C15)</label>
+              <select id="todoPriority">
+                <option value="HIGH">높음</option>
+                <option value="MEDIUM" selected>중간</option>
+                <option value="LOW">낮음</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 6px;">
+            <div style="flex:1;">
+              <label>태그 (T06-C16)</label>
+              <input type="text" id="todoTag" placeholder="예: 과제, 개발">
+            </div>
+            <div style="flex:1;">
+              <label>예상시간(h) (T06-C17)</label>
+              <input type="number" id="todoEst" placeholder="예: 2">
+            </div>
+          </div>
+
+          <button class="btn-gradient btn-blue" id="btnAddTodo" onclick="saveTodo()">+ 할 일 저장하기</button>
+        </div>
+
+        <div style="margin-top: 6px;">
+          <label style="display: block; margin-bottom: 6px;">📝 등록된 할 일 목록</label>
+          <div class="scroll-container" id="todoList"></div>
+        </div>
+      </section>
+
+      <!-- [카드 4] 돌아보기 (See) -->
+      <section class="section-card" id="colSee">
+        <div class="card-head">
+          <h2 style="color: var(--p-pink);">📊 3. 돌아보기 (See)</h2>
+        </div>
+
+        <div class="insight-box">
+          <div style="font-weight: 900; color: var(--p-purple); font-size: 13.5px; margin-bottom: 4px;">💡 차회 개선 한 줄 (T06-C33)</div>
+          <input type="text" id="nextActionInput" placeholder="예: 스키마 설계를 먼저 세분화하자" value="스키마 설계를 먼저 세분화하여 착수하기">
+          <button class="btn-gradient" style="width: 100%; margin-top: 8px; font-size: 11.5px; padding: 6px;" onclick="transferNextAction()">
+            ➡ 다음 계획으로 넘기기 (T06-C33)
+          </button>
+        </div>
+
+        <div style="background: #FFFFFF; border: 2px solid #F1F5F9; border-radius: var(--radius-lg); padding: 14px;">
+          <label style="display: block; margin-bottom: 8px;">📈 시간 집계 현황 (T06-C32)</label>
+          <div style="font-size: 13px; display: flex; flex-direction: column; gap: 6px; font-weight: 700;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-sub);">총 예상 시간:</span> <span id="displayEstHours">0시간</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-sub);">총 실제 시간:</span> <span id="displayActualHours" style="color: var(--p-blue);">0시간</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: var(--p-purple); font-weight: 900;">
+              <span>차이 (실제-예상):</span> <span id="displayDiffHours">0시간</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    // XSS 방지 안전 문사 이스케이프 함수 (T06-C57)
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // 전역 상태 관리를 localStorage와 연동 (T06-C34, C35)
+    let currentPlan = JSON.parse(localStorage.getItem('pds_plan')) || null;
+    let planHistory = JSON.parse(localStorage.getItem('pds_plan_history')) || [];
+    let todos = JSON.parse(localStorage.getItem('pds_todos')) || [];
+    let editingTodoId = null;
+
+    window.onload = function() {
+      loadPlanToForm();
+      renderPlanHistory();
+      renderTodos();
+    };
+
+    function focusSection(type, element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      if(element) element.classList.add('active');
+
+      const colPlan = document.getElementById('colPlan');
+      const colTodo = document.getElementById('colTodo');
+      const colSee = document.getElementById('colSee');
+
+      [colPlan, colTodo, colSee].forEach(col => col.classList.remove('highlight'));
+
+      if (type === 'plan') colPlan.classList.add('highlight');
+      else if (type === 'todo') colTodo.classList.add('highlight');
+      else if (type === 'see') colSee.classList.add('highlight');
+      else document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ─── 카드 1: 대표 계획 & 이력 보존 (T06-C04~C08) ───
+    function savePlan() {
+      const title = document.getElementById('planTitle').value;
+      const startDate = document.getElementById('planStartDate').value;
+      const endDate = document.getElementById('planEndDate').value;
+      const priority = document.getElementById('planPriority').value;
+      const success = document.getElementById('planSuccess').value;
+      const hours = parseFloat(document.getElementById('planHours').value) || 0;
+
+      if (!title) { alert("계획 제목을 입력해주세요!"); return; }
+
+      // 고쳐도 처음 계획이 보존되도록 planHistory 배열에 원본 보존 (T06-C08)
+      if (currentPlan) {
+        planHistory.unshift({
+          ...currentPlan,
+          savedAt: new Date().toLocaleString('ko-KR')
+        });
+        localStorage.setItem('pds_plan_history', JSON.stringify(planHistory));
+      }
+
+      currentPlan = { id: Date.now(), title, startDate, endDate, priority, success, hours };
+      localStorage.setItem('pds_plan', JSON.stringify(currentPlan));
+
+      renderPlanHistory();
+      renderTodos();
+      alert("✅ 대표 계획이 저장되었습니다! (수정 시 이전 이력 자동 보존)");
+    }
+
+    function loadPlanToForm() {
+      if (currentPlan) {
+        document.getElementById('planTitle').value = currentPlan.title || '';
+        document.getElementById('planStartDate').value = currentPlan.startDate || '';
+        document.getElementById('planEndDate').value = currentPlan.endDate || '';
+        document.getElementById('planPriority').value = currentPlan.priority || 'MEDIUM';
+        document.getElementById('planSuccess').value = currentPlan.success || '';
+        document.getElementById('planHours').value = currentPlan.hours || '';
+      }
+    }
+
+    function renderPlanHistory() {
+      const el = document.getElementById('planHistoryList');
+      el.innerHTML = '';
+      planHistory.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'history-card';
+        div.innerHTML = `<strong>${escapeHTML(h.title)}</strong> (${h.hours}h) <br><small style="color:var(--text-sub)">보존일시: ${h.savedAt}</small>`;
+        el.appendChild(div);
+      });
+    }
+
+    // ─── 카드 2 & 카드 3: 할 일 다루기 & 실행 기록 (T06-C09~C27) ───
+    function saveTodo() {
+      const content = document.getElementById('todoContent').value;
+      const due = document.getElementById('todoDue').value;
+      const priority = document.getElementById('todoPriority').value;
+      const tag = document.getElementById('todoTag').value;
+      const estHours = parseFloat(document.getElementById('todoEst').value) || 0;
+
+      if (!content) { alert("할 일 내용을 입력해주세요!"); return; }
+
+      if (editingTodoId) {
+        // 고치기 (T06-C10)
+        todos = todos.map(t => t.id === editingTodoId ? {
+          ...t, content, due, priority, tag, estHours
+        } : t);
+        editingTodoId = null;
+        document.getElementById('btnAddTodo').innerText = "+ 할 일 저장하기";
+      } else {
+        // 생성 (T06-C09)
+        const newTodo = {
+          id: Date.now(),
+          content,
+          due: due || '2026-10-16T18:00',
+          priority,
+          tag: tag || '과제',
+          estHours,
+          status: 'IN_PROGRESS',
+          executionLog: null // 카드 3 실행 기록 분리 저장
+        };
+        todos.push(newTodo);
+      }
+
+      // 정렬: 마감일 오름차순 (동률 시 ID 내림차순) (T06-C20)
+      sortTodos();
+      localStorage.setItem('pds_todos', JSON.stringify(todos));
+      
+      resetTodoForm();
+      renderTodos();
+    }
+
+    function resetTodoForm() {
+      document.getElementById('todoContent').value = '';
+      document.getElementById('todoDue').value = '';
+      document.getElementById('todoTag').value = '';
+      document.getElementById('todoEst').value = '';
+    }
+
+    function sortTodos() {
+      todos.sort((a, b) => {
+        const dA = new Date(a.due), dB = new Date(b.due);
+        if (dA - dB !== 0) return dA - dB;
+        return b.id - a.id;
+      });
+    }
+
+    function editTodo(id) {
+      const t = todos.find(item => item.id === id);
+      if (!t) return;
+      document.getElementById('todoContent').value = t.content;
+      document.getElementById('todoDue').value = t.due;
+      document.getElementById('todoPriority').value = t.priority;
+      document.getElementById('todoTag').value = t.tag;
+      document.getElementById('todoEst').value = t.estHours;
+
+      editingTodoId = id;
+      document.getElementById('btnAddTodo').innerText = "✏️ 할 일 고치기 수정완료";
+    }
+
+    function deleteTodo(id) {
+      if (!confirm("정말 이 할 일을 지우시겠습니까? (T06-C13)")) return;
+      todos = todos.filter(t => t.id !== id);
+      localStorage.setItem('pds_todos', JSON.stringify(todos));
+      renderTodos();
+    }
+
+    // 카드 3: 중복 클릭 방지 (Idempotency) 및 실행 기록 독립 저장 (T06-C21~C27)
+    let isProcessing = false;
+
+    function completeTodo(id, btnElement) {
+      if (isProcessing || (btnElement && btnElement.disabled)) return;
+      isProcessing = true;
+      if (btnElement) btnElement.disabled = true;
+
+      const t = todos.find(item => item.id === id);
+      if (!t) { isProcessing = false; return; }
+
+      if (t.status === 'DONE') {
+        // 되돌리기 (T06-C12)
+        t.status = 'IN_PROGRESS';
+      } else {
+        // 완료 및 실행 기록 적기 (T06-C11, C23~C26)
+        const startTime = prompt("실행 시작 시각을 입력하세요 (ISO/텍스트):", new Date().toISOString().slice(0, 16));
+        const endTime = prompt("실행 끝난 시각을 입력하세요 (ISO/텍스트):", new Date().toISOString().slice(0, 16));
+        const actualHours = parseFloat(prompt("실제로 걸린 시간(시간 단위)을 입력하세요:", "1")) || 0;
+        const blockedReason = prompt("막혔던 이유가 있다면 입력하세요 (없으면 확인):", "") || '';
+
+        t.status = 'DONE';
+        // 원래 계획 및 할일 기본값은 절대 덮어쓰지 않고 실행기록을 따로 저장 (T06-C27)
+        t.executionLog = {
+          startTime: startTime || new Date().toISOString(),
+          endTime: endTime || new Date().toISOString(),
+          actualHours: actualHours,
+          blockedReason: blockedReason
+        };
+      }
+
+      localStorage.setItem('pds_todos', JSON.stringify(todos));
+      renderTodos();
+      setTimeout(() => { isProcessing = false; }, 300);
+    }
+
+    // ─── 카드 4: 돌아보기 정확한 집계 및 숫자 클릭 이동 (T06-C28~C33, C83) ───
+    function renderTodos() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const listEl = document.getElementById('todoList');
+      listEl.innerHTML = '';
+
+      let doneCount = 0;
+      let delayCount = 0;
+      let blockCount = 0;
+      let totalEstHours = 0;
+      let totalActualHours = 0;
+
+      const nowSeoul = new Date();
+
+      todos.forEach(t => {
+        totalEstHours += (t.estHours || 0);
+
+        // 완료 수 (T06-C29)
+        if (t.status === 'DONE') {
+          doneCount++;
+          if (t.executionLog) {
+            totalActualHours += (t.executionLog.actualHours || 0);
+          }
+        }
+
+        // 지연 수 (T06-C30): 완료되지 않았고 마감일이 오늘보다 앞선 할 일 (완료한 할일 두번 안세도록)
+        if (t.status !== 'DONE' && t.due) {
+          if (new Date(t.due) < nowSeoul) {
+            delayCount++;
+          }
+        }
+
+        // 막힘 수 (T06-C31): 막힌 이유가 하나라도 적힌 건수
+        if (t.executionLog && t.executionLog.blockedReason && t.executionLog.blockedReason.trim() !== '') {
+          blockCount++;
+        }
+
+        // 필터링 적용
+        if (search && !t.content.toLowerCase().includes(search)) return;
+        if (statusFilter === 'IN_PROGRESS' && t.status !== 'IN_PROGRESS') return;
+        if (statusFilter === 'DONE' && t.status !== 'DONE') return;
+
+        // 리스트 UI 생성 (XSS 안전 이스케이프)
+        const box = document.createElement('div');
+        box.className = `item-card ${t.status === 'DONE' ? 'done' : ''}`;
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span class="tag-badge">#${escapeHTML(t.tag)}</span>
+              <strong class="todo-title" style="font-size:14px; margin-left:4px;">${escapeHTML(t.content)}</strong>
+              <div style="font-size:11.5px; color:var(--text-sub); margin-top:4px;">
+                마감: ${t.due} | 우선순위: ${t.priority} | 예상: ${t.estHours}h
+              </div>
+              ${t.executionLog ? `
+                <div style="font-size:11px; color:var(--p-blue); margin-top:4px; background:#F0F9FF; padding:4px 8px; border-radius:6px;">
+                  ⏱️ 실행기록: ${t.executionLog.actualHours}h 소요 (시작: ${t.executionLog.startTime.slice(11,16)} ~ 끝: ${t.executionLog.endTime.slice(11,16)})${t.executionLog.blockedReason ? `<br><span style="color:var(--p-pink)">🚨 막힘이유: ${escapeHTML(t.executionLog.blockedReason)}</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button class="btn-sm" style="background:#E2E8F0;" onclick="editTodo(${t.id})">수정</button>
+              <button class="btn-sm" style="background:#FEE2E2; color:#991B1B;" onclick="deleteTodo(${t.id})">삭제</button>
+              <button class="btn-sm" style="background:${t.status === 'DONE' ? '#CBD5E1' : 'var(--p-green)'}; color:white;" onclick="completeTodo(${t.id}, this)">
+                ${t.status === 'DONE' ? '되돌리기' : '완료'}
+              </button>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(box);
+      });
+
+      // 돌아보기 KPI 카운터 갱신 (T06-C28~C31)
+      document.getElementById('statPlanCount').innerText = todos.length; // 지우지 않은 할일 수
+      document.getElementById('statDoneCount').innerText = doneCount;
+      document.getElementById('statDelayCount').innerText = delayCount;
+      document.getElementById('statBlockCount').innerText = blockCount;
+
+      // 돌아보기 시간 공식 집계 (T06-C32)
+      const diff = totalActualHours - totalEstHours;
+      document.getElementById('displayEstHours').innerText = `${totalEstHours}시간`;
+      document.getElementById('displayActualHours').innerText = `${totalActualHours}시간`;
+      document.getElementById('displayDiffHours').innerText = `${diff > 0 ? '+' : ''}${diff}시간`;
+    }
+
+    // 돌아보기 숫자 눌렀을 때 해당 근거 기록으로 바로 이동 (T06-C83)
+    function filterAndScroll(filterType) {
+      document.getElementById('statusFilter').value = filterType === 'DELAY' || filterType === 'BLOCK' ? 'ALL' : filterType;
+      renderTodos();
+      focusSection('todo', document.querySelectorAll('.nav-item')[2]);
+    }
+
+    // T06-C33 피드백 한 줄 다음 계획으로 넘기기
+    function transferNextAction() {
+      const val = document.getElementById('nextActionInput').value;
+      if (!val) { alert("넘길 고칠 점 내용을 적어주세요!"); return; }
+      document.getElementById('planSuccess').value = `[이전 돌아보기 피드백 이관] ${val}`;
+      focusSection('plan', document.querySelectorAll('.nav-item')[1]);
+      alert("✅ 돌아보기의 고칠 점이 다음 대표 계획 성공 기준란으로 넘어갔습니다!");
+    }
+
+    // ─── 카드 5: 내보내기 (T06-C36) ───
+    function exportData() {
+      const payload = {
+        plan: currentPlan,
+        planHistory: planHistory,
+        todos: todos,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "pds_workspace_data.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

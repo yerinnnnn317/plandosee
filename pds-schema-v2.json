@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PlanDoSeeSchemaV2",
+  "timezone": "Asia/Seoul",
+  "tables": {
+    "plans": {
+      "columns": {
+        "id": "UUID PRIMARY KEY",
+        "title": "TEXT NOT NULL",
+        "start_date": "DATE NOT NULL",
+        "end_date": "DATE NOT NULL",
+        "priority": "VARCHAR(10) NOT NULL",
+        "success_criteria": "TEXT NOT NULL",
+        "estimated_hours": "NUMERIC(5,2) NOT NULL",
+        "created_at": "TIMESTAMPTZ DEFAULT NOW()"
+      }
+    },
+    "plan_histories": {
+      "comment": "T06-C08: 계획 수정 시 이전 기록 보존용",
+      "columns": {
+        "id": "UUID PRIMARY KEY",
+        "plan_id": "UUID REFERENCES plans(id)",
+        "title": "TEXT",
+        "start_date": "DATE",
+        "end_date": "DATE",
+        "priority": "VARCHAR(10)",
+        "success_criteria": "TEXT",
+        "estimated_hours": "NUMERIC(5,2)",
+        "changed_at": "TIMESTAMPTZ DEFAULT NOW()"
+      }
+    },
+    "todos": {
+      "columns": {
+        "id": "UUID PRIMARY KEY",
+        "plan_id": "UUID REFERENCES plans(id) ON DELETE CASCADE",
+        "content": "TEXT NOT NULL",
+        "status": "VARCHAR(20) DEFAULT 'IN_PROGRESS'",
+        "due_date": "TIMESTAMPTZ NOT NULL",
+        "priority": "VARCHAR(10) NOT NULL",
+        "tags": "TEXT[] DEFAULT '{}'",
+        "estimated_hours": "NUMERIC(5,2) NOT NULL",
+        "created_at": "TIMESTAMPTZ DEFAULT NOW()",
+        "is_deleted": "BOOLEAN DEFAULT FALSE"
+      }
+    },
+    "execution_logs": {
+      "columns": {
+        "id": "UUID PRIMARY KEY",
+        "todo_id": "UUID REFERENCES todos(id) ON DELETE CASCADE",
+        "start_time": "TIMESTAMPTZ NOT NULL",
+        "end_time": "TIMESTAMPTZ NOT NULL",
+        "actual_hours": "NUMERIC(5,2) NOT NULL",
+        "blocked_reason": "TEXT NULL",
+        "idempotency_key": "VARCHAR(64) UNIQUE NULL",
+        "created_at": "TIMESTAMPTZ DEFAULT NOW()"
+      }
+    },
+    "retrospectives": {
+      "columns": {
+        "id": "UUID PRIMARY KEY",
+        "plan_id": "UUID REFERENCES plans(id)",
+        "improvement_action": "TEXT NOT NULL",
+        "next_plan_id": "UUID REFERENCES plans(id) NULL",
+        "created_at": "TIMESTAMPTZ DEFAULT NOW()"
+      }
+    }
+  }
+}
